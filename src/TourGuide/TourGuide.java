@@ -9,8 +9,8 @@ import java.util.Scanner;
 public class TourGuide {
 
     static int tourists;
-    static double speedMe, speedThem, angle, guideDistance, x, y, returnDistance, timeTracker, totalTime,
-            sumTimeChase, xx, yy, timeStep = 0.05;
+    static double speedGuide, speedThem, angle, guideDistance, x, y, returnDistance, totalTime,
+            sumTimeChase, xx, yy;
     static double[] timeChase, timeReturn;
 
     public static void main(String[] args) {
@@ -21,8 +21,7 @@ public class TourGuide {
             if (tourists == 0)
                 break;
 
-            speedMe = sc.nextDouble();
-            timeTracker = 0;
+            speedGuide = sc.nextDouble();
             timeChase = new double[tourists];
             timeReturn = new double[tourists];
             sumTimeChase = 0;
@@ -34,14 +33,52 @@ public class TourGuide {
                 y = sc.nextDouble();
                 speedThem = sc.nextDouble();
                 angle = sc.nextDouble();
-                guideDistance = 0;
+                guideDistance = Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy));
                 returnDistance = 0;
 
-                calculateTourist(i);
+                calcTourist(i);
             }
             System.out.println(calculateTime());
         }
+    }
 
+
+    public static void calcTourist(int tourist) {
+        double guessTime = guideDistance / speedGuide;
+        double xOrig = x;
+        double yOrig = y;
+        double trackMax = 1000000;
+        double trackMin = 0;
+
+//        REMOVE!!
+//        int c = 0;
+
+        while (true) {
+            x = xOrig + Math.cos(angle) * guessTime * speedThem;
+            y = yOrig + Math.sin(angle) * guessTime * speedThem;
+            guideDistance = Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy));
+
+//            //REMOVE!!!
+//            double temp = guideDistance / guessTime;
+//            System.out.println(c + ": " + temp);
+//            c++;
+
+            if (speedGuide > guideDistance / guessTime + 0.0001) {
+                trackMax = guessTime;
+                guessTime -= (trackMax - trackMin) / 2;
+            } else if (speedGuide < guideDistance / guessTime - 0.0001) {
+                trackMin = guessTime;
+                guessTime += (trackMax - trackMin) / 2;
+            } else
+                break;
+        }
+        timeChase[tourist] = guessTime - sumTimeChase;
+        sumTimeChase = guessTime;
+        returnDistance = Math.sqrt(x * x + y * y);
+        timeReturn[tourist] = returnDistance / speedThem;
+
+        xx = x;
+        yy = y;
     }
 
     private static long calculateTime() {
@@ -55,26 +92,4 @@ public class TourGuide {
         }
         return Math.round(totalTime);
     }
-
-    public static void calculateTourist(int tourist) {
-
-        x += Math.cos(angle) * timeTracker * speedThem;
-        y += Math.sin(angle) * timeTracker * speedThem;
-
-        do {
-            x += speedThem * timeStep * Math.cos(angle);
-            y += speedThem * timeStep * Math.sin(angle);
-            timeTracker += timeStep;
-            guideDistance = Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy));
-        }
-        while (guideDistance / speedMe < timeTracker - 0.1 || guideDistance / speedMe > timeTracker + 0.1);
-        timeChase[tourist] = timeTracker - sumTimeChase;
-        sumTimeChase = timeTracker;
-        returnDistance = Math.sqrt(x * x + y * y);
-        timeReturn[tourist] = returnDistance / speedThem;
-
-        xx = x;
-        yy = y;
-    }
-
 }
