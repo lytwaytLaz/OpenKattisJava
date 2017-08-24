@@ -9,8 +9,8 @@ import java.util.Scanner;
 public class TourGuide {
 
     static int tourists;
-    static double speedGuide, speedThem, angle, guideDistance, x, y, returnDistance, totalTime,
-            sumTimeChase, xx, yy;
+    static double speedGuide, speedTourist, angle, guideDistance, xT, yT, returnDistance, totalTime,
+            sumTimeChase, xG, yG;
     static double[] timeChase, timeReturn;
 
     public static void main(String[] args) {
@@ -25,16 +25,14 @@ public class TourGuide {
             timeChase = new double[tourists];
             timeReturn = new double[tourists];
             sumTimeChase = 0;
-            xx = 0;
-            yy = 0;
+            xG = 0;
+            yG = 0;
 
             for (int i = 0; i < tourists; i++) {
-                x = sc.nextDouble();
-                y = sc.nextDouble();
-                speedThem = sc.nextDouble();
+                xT = sc.nextDouble();
+                yT = sc.nextDouble();
+                speedTourist = sc.nextDouble();
                 angle = sc.nextDouble();
-                guideDistance = Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy));
-                returnDistance = 0;
 
                 calcTourist(i);
             }
@@ -44,9 +42,9 @@ public class TourGuide {
 
 
     public static void calcTourist(int tourist) {
-        double guessTime = guideDistance / speedGuide;
-        double xOrig = x;
-        double yOrig = y;
+        double guessTime = 0;
+        double xOrig = xT;
+        double yOrig = yT;
         double trackMax = 1000000;
         double trackMin = 0;
 
@@ -54,34 +52,46 @@ public class TourGuide {
 //        int c = 0;
 
         while (true) {
-            x = xOrig + Math.cos(angle) * guessTime * speedThem;
-            y = yOrig + Math.sin(angle) * guessTime * speedThem;
-            guideDistance = Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy));
+            xT = xOrig + Math.cos(angle) * guessTime * speedTourist;
+            yT = yOrig + Math.sin(angle) * guessTime * speedTourist;
+            guideDistance = Math.sqrt((xT - xG) * (xT - xG) + (yT - yG) * (yT - yG));
 
 //            //REMOVE!!!
 //            double temp = guideDistance / guessTime;
 //            System.out.println(c + ": " + temp);
 //            c++;
 
-            if (speedGuide > guideDistance / guessTime + 0.0001) {
+            if (speedGuide > guideDistance / guessTime + 0.00001) {
                 trackMax = guessTime;
                 guessTime -= (trackMax - trackMin) / 2;
-            } else if (speedGuide < guideDistance / guessTime - 0.0001) {
+            } else if (speedGuide < guideDistance / guessTime - 0.00001) {
                 trackMin = guessTime;
                 guessTime += (trackMax - trackMin) / 2;
             } else
                 break;
         }
-        timeChase[tourist] = guessTime - sumTimeChase;
-        sumTimeChase = guessTime;
-        returnDistance = Math.sqrt(x * x + y * y);
-        timeReturn[tourist] = returnDistance / speedThem;
+//        timeChase[tourist] = guessTime - sumTimeChase;
+//        sumTimeChase = guessTime;
 
-        xx = x;
-        yy = y;
+
+        timeChase[tourist] = guessTime;
+//        returnDistance = Math.sqrt(xT * xT + yT * yT);
+        timeReturn[tourist] = Math.sqrt(xT * xT + yT * yT) / speedTourist;
+
+        xG = xT;
+        yG = yT;
     }
 
-    private static long calculateTime() {
+    private static int calculateTime() {
+        for(double k : timeChase) {
+            System.out.print(k + " ");
+            sumTimeChase += k;
+        }
+        System.out.println();
+        for(double j : timeReturn)
+            System.out.print(j+" ");
+        System.out.println();
+
         totalTime = sumTimeChase + timeReturn[timeReturn.length - 1];
         double timeCount = 0;
         for (int i = 0; i < timeReturn.length; i++) {
@@ -90,6 +100,7 @@ public class TourGuide {
                 totalTime = timeReturn[i] + timeCount;
             }
         }
-        return Math.round(totalTime);
+        System.out.println(totalTime);
+        return (int)Math.round(totalTime);
     }
 }
